@@ -10,6 +10,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="B612神學小星球">
+  <!-- Open Graph 社群連結預覽卡片資訊 (FB / LINE / Threads / Plurk) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="🪐 B612 神學小星球 ‧ 小王子的星空神學探索" />
+  <meta property="og:description" content="在 B612 神學小星球與小王子一起漫步星空、看日落、種花，探索超過五百篇神學思考與聖經研析！" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="🪐 B612 神學小星球" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Three.js & TrackballControls -->
@@ -409,23 +415,37 @@
       <div class="p-4 sm:p-5 overflow-y-auto custom-scroll space-y-4">
         <!-- 拍立得預覽框 -->
         <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner flex flex-col items-center">
-          <img id="captured-photo-img" src="" alt="B612 星球快照" class="w-full max-h-64 object-contain rounded-xl border border-amber-400/30" />
+          <div class="w-full flex items-center justify-between mb-2 px-1">
+            <span class="text-xs text-amber-200 font-medium flex items-center gap-1">
+              <span>✨</span>
+              <span>已自動為你拉近鏡頭並放大角色！</span>
+            </span>
+            <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl p-0.5">
+              <button id="zoom-btn-closeup" onclick="retakePhotoWithZoom('closeup')" class="px-2.5 py-1 rounded-lg text-xs bg-amber-400 text-slate-950 font-bold transition">特寫放大</button>
+              <button id="zoom-btn-wide" onclick="retakePhotoWithZoom('wide')" class="px-2.5 py-1 rounded-lg text-xs text-slate-300 hover:text-amber-200 transition">全景</button>
+            </div>
+          </div>
+          <img id="captured-photo-img" src="" alt="B612 星球快照" class="w-full max-h-72 object-contain rounded-xl border border-amber-400/30 shadow-lg" />
           <div class="mt-2.5 flex flex-wrap items-center justify-center gap-2 w-full">
-            <button onclick="downloadCapturedPhoto()" class="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow transition">
-              <i class="ph ph-download-simple text-base"></i>
-              <span>下載紀念相片 (PNG)</span>
+            <button onclick="copyCapturedPhotoToClipboard()" class="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow transition">
+              <i class="ph ph-copy text-base"></i>
+              <span>複製圖片 (可直接 Ctrl+V 貼到 FB/LINE)</span>
             </button>
-            <button onclick="nativeShareCapturedPhoto()" class="py-2 px-3 rounded-xl bg-pink-500/25 hover:bg-pink-500/40 border border-pink-400/50 text-pink-100 font-bold text-xs flex items-center justify-center gap-1.5 transition" title="使用手機或系統原生分享相片">
+            <button onclick="downloadCapturedPhoto()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-400/40 text-amber-200 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+              <i class="ph ph-download-simple text-base"></i>
+              <span>下載圖檔</span>
+            </button>
+            <button onclick="nativeShareCapturedPhoto()" class="py-2 px-3 rounded-xl bg-pink-500/25 hover:bg-pink-500/40 border border-pink-400/50 text-pink-100 font-bold text-xs flex items-center justify-center gap-1.5 transition" title="手機可直接帶圖檔分享到 FB/IG/LINE">
               <i class="ph ph-share-network text-base"></i>
-              <span>系統分享相片</span>
+              <span>手機帶圖分享</span>
             </button>
           </div>
         </div>
 
         <!-- 社群平台快速分享按鈕列 -->
         <div class="space-y-2">
-          <div class="text-xs font-medium text-slate-300 flex items-center justify-between">
-            <span>分享星球到社群平台（可先下載相片再貼上）：</span>
+          <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-400/30 text-[11px] sm:text-xs text-amber-100 leading-relaxed">
+            💡 <strong>如何把圖檔貼到臉書 FB？</strong> 點擊下方社群按鈕時，系統會<strong>自動幫你複製這張圖片並下載圖檔</strong>；打開 FB 貼文視窗後，直接在輸入框按 <strong>Ctrl + V（貼上）</strong> 就能把照片貼上去囉！（手機版會自動呼叫 App 帶圖分享）
           </div>
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
             <button onclick="shareToSocial('facebook')" class="p-2.5 rounded-xl bg-blue-600/25 hover:bg-blue-600/40 border border-blue-400/40 text-blue-200 text-xs font-medium flex flex-col items-center gap-1 transition">
@@ -3355,9 +3375,53 @@
     }
 
     let lastCapturedDataUrl = '';
+    let currentPhotoZoomMode = 'closeup'; // 'closeup' (特寫放大角色與星球) | 'wide' (標準全景)
+
+    function retakePhotoWithZoom(mode) {
+      currentPhotoZoomMode = mode;
+      const btnClose = document.getElementById('zoom-btn-closeup');
+      const btnWide = document.getElementById('zoom-btn-wide');
+      if (btnClose && btnWide) {
+        if (mode === 'closeup') {
+          btnClose.className = 'px-2.5 py-1 rounded-lg text-xs bg-amber-400 text-slate-950 font-bold transition';
+          btnWide.className = 'px-2.5 py-1 rounded-lg text-xs text-slate-300 hover:text-amber-200 transition';
+        } else {
+          btnWide.className = 'px-2.5 py-1 rounded-lg text-xs bg-amber-400 text-slate-950 font-bold transition';
+          btnClose.className = 'px-2.5 py-1 rounded-lg text-xs text-slate-300 hover:text-amber-200 transition';
+        }
+      }
+      renderSnapshotCanvas(mode);
+    }
 
     function captureAndOpenPhotoModal() {
       playSfx('camera_shutter');
+      retakePhotoWithZoom('closeup');
+
+      const modal = document.getElementById('photo-share-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function renderSnapshotCanvas(zoomMode = 'closeup') {
+      // 儲存原本的攝影機距離與角色比例
+      const origCamPos = camera.position.clone();
+      const origFov = camera.fov;
+      const savedScales = allStandeeMeshes.map(m => m.scale.clone());
+
+      if (zoomMode === 'closeup') {
+        // 1. 將攝影機視角拉近 (降低 FOV 讓星球與主體充滿畫面，不再空曠)
+        camera.fov = Math.max(24, origFov * 0.64);
+        camera.updateProjectionMatrix();
+
+        // 2. 將小王子、小綿羊與所有地標立牌放大 1.38 倍，讓角色在快照裡鮮明突出
+        allStandeeMeshes.forEach(m => {
+          const isGrass = m.userData.svgKey && m.userData.svgKey.startsWith('grass_');
+          const boost = isGrass ? 1.12 : 1.38;
+          m.scale.multiplyScalar(boost);
+        });
+      }
+
+      updateAllStandeeBillboards(clock.getElapsedTime());
       renderer.render(scene, camera);
 
       const srcCanvas = renderer.domElement;
@@ -3366,57 +3430,88 @@
       outCanvas.height = srcCanvas.height;
       const ctx = outCanvas.getContext('2d');
 
-      // 1. 繪製星空或日落背景漸層
+      // 繪製星空或日落背景漸層
       const grad = ctx.createRadialGradient(
-        outCanvas.width * 0.5, outCanvas.height * 0.4, 10,
-        outCanvas.width * 0.5, outCanvas.height * 0.5, Math.max(outCanvas.width, outCanvas.height) * 0.75
+        outCanvas.width * 0.5, outCanvas.height * 0.45, 10,
+        outCanvas.width * 0.5, outCanvas.height * 0.5, Math.max(outCanvas.width, outCanvas.height) * 0.72
       );
       if (isSunsetActive) {
-        grad.addColorStop(0, '#7c2d12');
+        grad.addColorStop(0, '#9a3412');
         grad.addColorStop(0.5, '#1e1b4b');
         grad.addColorStop(1, '#090d16');
       } else {
-        grad.addColorStop(0, '#172554');
+        grad.addColorStop(0, '#1e3a8a');
         grad.addColorStop(0.55, '#0f172a');
         grad.addColorStop(1, '#020617');
       }
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
 
-      // 2. 疊加 Three.js 3D 星球畫面
+      // 疊加拉近放大後的 Three.js 3D 星球與角色畫面
       ctx.drawImage(srcCanvas, 0, 0);
 
-      // 3. 繪製精緻底部紀念浮水印標誌
+      // 恢復原本的攝影機 FOV 與角色比例
+      camera.position.copy(origCamPos);
+      camera.fov = origFov;
+      camera.updateProjectionMatrix();
+      allStandeeMeshes.forEach((m, idx) => {
+        m.scale.copy(savedScales[idx]);
+      });
+      renderer.render(scene, camera);
+
+      // 繪製精緻底部紀念浮水印標誌
       const pad = Math.round(outCanvas.width * 0.025);
       ctx.save();
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
-      const badgeW = Math.min(340, outCanvas.width * 0.78);
-      const badgeH = 44;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+      const badgeW = Math.min(360, outCanvas.width * 0.82);
+      const badgeH = 46;
       ctx.beginPath();
-      ctx.roundRect(pad, outCanvas.height - badgeH - pad, badgeW, badgeH, 14);
+      if (ctx.roundRect) {
+        ctx.roundRect(pad, outCanvas.height - badgeH - pad, badgeW, badgeH, 14);
+      } else {
+        ctx.rect(pad, outCanvas.height - badgeH - pad, badgeW, badgeH);
+      }
       ctx.fill();
-      ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.65)';
+      ctx.lineWidth = 1.8;
       ctx.stroke();
 
       ctx.fillStyle = '#fef3c7';
       ctx.font = 'bold 16px "Noto Serif TC", serif';
-      ctx.fillText('🪐 B612 神學小星球 ‧ 星空漫步紀念', pad + 14, outCanvas.height - pad - 16);
+      ctx.fillText('🪐 B612 神學小星球 ‧ 星空漫步紀念', pad + 14, outCanvas.height - pad - 17);
       ctx.restore();
 
       lastCapturedDataUrl = outCanvas.toDataURL('image/png');
       const imgEl = document.getElementById('captured-photo-img');
       if (imgEl) imgEl.src = lastCapturedDataUrl;
-
-      const modal = document.getElementById('photo-share-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
     }
 
     function closePhotoShareModal() {
       const modal = document.getElementById('photo-share-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+
+    async function copyCapturedPhotoToClipboard(silent = false) {
+      if (!lastCapturedDataUrl) return false;
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          const res = await fetch(lastCapturedDataUrl);
+          const blob = await res.blob();
+          const item = new ClipboardItem({ 'image/png': blob });
+          await navigator.clipboard.write([item]);
+          if (!silent) {
+            showPlanetToast('📋', '圖片已複製到剪貼簿！到 FB / LINE / Threads 貼文框按 Ctrl+V 即可直接貼上圖檔！');
+          }
+          return true;
+        }
+      } catch (err) {
+        console.warn('Clipboard image copy fallback:', err);
+      }
+      if (!silent) {
+        downloadCapturedPhoto();
+      }
+      return false;
     }
 
     function downloadCapturedPhoto() {
@@ -3433,23 +3528,23 @@
     async function nativeShareCapturedPhoto() {
       const shareUrl = window.location.href;
       const shareTitle = 'B612 神學小星球';
-      const shareText = '我在「B612 神學小星球」與小王子一起漫步星空、讀神學好文！邀請你一起來探索 🪐';
+      const shareText = '我在「B612 神學小星球」與小王子一起漫步星空、讀神學好文！邀請你一起來探索 🪐 ' + shareUrl;
       try {
         if (navigator.share && lastCapturedDataUrl) {
           const res = await fetch(lastCapturedDataUrl);
           const blob = await res.blob();
           const file = new File([blob], 'b612-planet.png', { type: 'image/png' });
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ title: shareTitle, text: shareText, url: shareUrl, files: [file] });
-            return;
+            await navigator.share({ title: shareTitle, text: shareText, files: [file] });
+            return true;
           }
-          await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-          return;
         }
       } catch (err) {
-        console.warn('Native share cancelled or unavailable:', err);
+        console.warn('Native file share cancelled or unavailable:', err);
       }
+      await copyCapturedPhotoToClipboard(true);
       downloadCapturedPhoto();
+      return false;
     }
 
     function copyTextToClipboard(text) {
@@ -3463,26 +3558,56 @@
       ta.remove();
     }
 
-    function shareToSocial(platform) {
+    async function shareToSocial(platform) {
       playSfx('click');
       const shareUrl = window.location.href;
       const shareText = '我在「B612 神學小星球」與小王子一起漫步星空、讀神學好文！🪐';
 
-      if (platform === 'facebook') {
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
-      } else if (platform === 'line') {
-        window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
-      } else if (platform === 'threads') {
-        window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank', 'noopener,noreferrer');
-      } else if (platform === 'plurk') {
-        window.open(`https://www.plurk.com/?qualifier=shares&status=${encodeURIComponent(shareUrl + ' (' + shareText + ')')}`, '_blank', 'noopener,noreferrer');
-      } else if (platform === 'instagram') {
-        downloadCapturedPhoto();
-        copyTextToClipboard(shareText + ' ' + shareUrl);
-        showPlanetToast('📸', '已為你下載相片並複製星球連結，打開 IG 即可直接發限動或貼文分享！');
-      } else if (platform === 'copy') {
+      if (platform === 'copy') {
         copyTextToClipboard(shareUrl);
         showPlanetToast('🔗', '星球網址已複製到剪貼簿！可以貼給朋友囉～');
+        return;
+      }
+
+      // 1. 若在手機/平板環境且支援原生圖檔分享 (Web Share API Level 2)，直接把 PNG 圖檔傳給 FB / IG / LINE / Threads App！
+      const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobileDevice && navigator.share && lastCapturedDataUrl) {
+        try {
+          const res = await fetch(lastCapturedDataUrl);
+          const blob = await res.blob();
+          const file = new File([blob], 'b612-planet.png', { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'B612 神學小星球',
+              text: shareText + ' ' + shareUrl,
+              files: [file]
+            });
+            return;
+          }
+        } catch (err) {
+          console.warn('Mobile share fallback:', err);
+        }
+      }
+
+      // 2. 電腦版：自動把「圖片本身」複製到系統剪貼簿 + 自動下載圖檔備用，讓使用者在 FB 貼文框按 Ctrl+V 直接貼上照片！
+      const copiedImg = await copyCapturedPhotoToClipboard(true);
+      downloadCapturedPhoto();
+
+      if (platform === 'facebook') {
+        showPlanetToast('📘', copiedImg ? '已自動複製圖片並下載！在開啟的 FB 貼文框按 Ctrl+V 即可直接貼上照片！' : '已為你下載紀念照片，請在開啟的 FB 視窗上傳照片分享！');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'line') {
+        showPlanetToast('💬', '已自動複製圖片並下載！在 LINE 聊天室按 Ctrl+V 即可直接貼上照片！');
+        window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'threads') {
+        showPlanetToast('🧵', '已自動複製圖片！在開啟的 Threads 貼文框按 Ctrl+V 即可直接把照片貼上去！');
+        window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'plurk') {
+        showPlanetToast('🐾', '已自動複製圖片！在開啟的噗浪貼文框按 Ctrl+V 即可直接貼上照片！');
+        window.open(`https://www.plurk.com/?qualifier=shares&status=${encodeURIComponent(shareUrl + ' (' + shareText + ')')}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'instagram') {
+        copyTextToClipboard(shareText + ' ' + shareUrl);
+        showPlanetToast('📸', '已下載紀念相片並複製文字連結，打開 IG 即可上傳相片發限動或貼文！');
       }
     }
 

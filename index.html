@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>B612 神學小星球</title>
+  <!-- Favicon & Apple Touch Icons (顯示於書籤與手機主畫面) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="B612神學小星球">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Three.js & TrackballControls -->
@@ -173,6 +179,10 @@
         <i id="icon-sfx" class="ph ph-speaker-high"></i>
         <span id="text-sfx" class="hidden lg:inline">音效開</span>
       </button>
+      <button id="btn-photo" onclick="captureAndOpenPhotoModal()" class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-900/85 hover:bg-slate-800 border border-pink-400/50 text-pink-200 text-xs flex items-center gap-1 shadow-lg backdrop-blur-md transition" title="拍下喜歡的星球畫面並分享到社群">
+        <i class="ph ph-camera"></i>
+        <span>拍照</span>
+      </button>
       <button id="btn-pause" onclick="togglePauseFreeze()" class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-slate-900/85 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs flex items-center gap-1 shadow-lg backdrop-blur-md transition" title="凍結畫面">
         <i id="icon-pause" class="ph ph-pause"></i>
         <span id="text-pause">暫停</span>
@@ -199,7 +209,14 @@
           <p id="drawer-subtitle" class="text-xs text-slate-400 truncate">三一上帝的奧秘、救恩論、終末與盼望</p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- 字體大小切換工具列 (體貼年長讀者與不同閱讀習慣) -->
+        <div class="flex items-center bg-slate-800/90 border border-slate-700 rounded-xl p-0.5" title="調整文章字體大小">
+          <button onclick="setArticleFontSize('sm')" id="font-btn-sm" class="px-2 py-1 rounded-lg text-xs text-slate-300 hover:text-amber-200 transition">小</button>
+          <button onclick="setArticleFontSize('md')" id="font-btn-md" class="px-2 py-1 rounded-lg text-xs bg-amber-400 text-slate-950 font-bold transition">中</button>
+          <button onclick="setArticleFontSize('lg')" id="font-btn-lg" class="px-2 py-1 rounded-lg text-xs text-slate-300 hover:text-amber-200 transition">大</button>
+          <button onclick="setArticleFontSize('xl')" id="font-btn-xl" class="px-2 py-1 rounded-lg text-xs text-slate-300 hover:text-amber-200 transition">特大</button>
+        </div>
         <button id="btn-back-to-list" onclick="closeArticleReaderView()" class="hidden px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-200 text-xs font-medium items-center gap-1 transition">
           <i class="ph ph-arrow-left"></i>
           <span>返回列表</span>
@@ -307,7 +324,7 @@
 
   <!-- 雙翼飛機：作者介紹視窗 -->
   <div id="author-modal" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md hidden items-center justify-center p-4" onclick="closeAuthorModal()">
-    <div class="w-full max-w-md bg-slate-900/95 border-2 border-amber-400/70 rounded-3xl shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+    <div class="w-full max-w-lg bg-slate-900/95 border-2 border-amber-400/70 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]" onclick="event.stopPropagation()">
       <div class="p-5 bg-gradient-to-r from-amber-500/20 via-slate-900 to-sky-500/20 border-b border-slate-800 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="text-3xl">✈️</span>
@@ -320,10 +337,46 @@
           <i class="ph ph-x"></i>
         </button>
       </div>
-      <div class="p-6 space-y-4">
-        <div class="p-4 rounded-2xl bg-slate-800/80 border border-amber-400/30 text-sm sm:text-base text-amber-100 leading-relaxed font-medium">
-          子藝（毛毛牙），奇科幻小說家，超愛讀書、看漫畫、打電動跟畫圖的基督徒。
+      <div class="p-5 sm:p-6 overflow-y-auto custom-scroll space-y-4">
+        <div class="p-4 rounded-2xl bg-slate-800/85 border border-amber-400/30 text-xs sm:text-sm text-amber-100 leading-relaxed font-medium">
+          子藝（毛毛牙），奇科幻小說作家，骨灰級阿宅，重度鉛字中毒者，連載過漫畫、參加過畫展、出了幾本小說，非常熱愛研究聖經，一直希望有朝一日可以去讀神學院。
         </div>
+
+        <!-- 著作列表 -->
+        <div class="space-y-3 text-xs sm:text-sm">
+          <h4 class="font-serif-tc font-bold text-amber-300 text-sm sm:text-base flex items-center gap-1.5">
+            <span>📚</span>
+            <span>著作列表</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-1.5">
+              <div class="font-bold text-amber-200 text-xs">✦ 小說</div>
+              <ul class="text-slate-200 text-xs space-y-1 pl-3 list-disc marker:text-amber-400">
+                <li>歸途 第一部：納席華</li>
+                <li>歸途 第二部：駱沙利南</li>
+                <li>光明繼承者LIKADO</li>
+              </ul>
+              <div class="font-bold text-amber-200 text-xs pt-2">✦ 論文</div>
+              <ul class="text-slate-200 text-xs space-y-1 pl-3 list-disc marker:text-amber-400">
+                <li>面對寫作瓶頸：小說作家轉化學習歷程之研究</li>
+              </ul>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-1.5">
+              <div class="font-bold text-amber-200 text-xs">✦ 合著作品</div>
+              <ul class="text-slate-200 text-xs space-y-1 pl-3 list-disc marker:text-sky-400">
+                <li>3.5：全面升級</li>
+                <li>捷運╳殭屍</li>
+                <li>捷運╳殭屍02</li>
+                <li>捷運╳殭屍03</li>
+                <li>群星歸位：台灣克蘇魯神話故事集Ⅰ</li>
+                <li>島嶼新日常：無條件基本收入制的台灣想像</li>
+                <li>異世歧路：俐茹、殭屍、大接龍</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div class="pt-2 flex justify-end gap-2">
           <a href="https://momoge.blogspot.com/" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-200 text-xs font-medium transition flex items-center gap-1">
             <span>前往旭日之丘部落格</span>
@@ -332,6 +385,74 @@
           <button onclick="closeAuthorModal()" class="px-5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition shadow-md">
             繼續探索星球
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 拍照與社群分享視窗 (FB、IG、Threads 脆、LINE、Plurk 噗浪、複製連結) -->
+  <div id="photo-share-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4" onclick="closePhotoShareModal()">
+    <div class="w-full max-w-lg bg-slate-900/95 border-2 border-pink-400/70 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-pink-500/20 via-slate-900 to-amber-500/20 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">📸</span>
+          <div>
+            <h3 class="font-serif-tc font-bold text-base sm:text-lg text-amber-100">B612 星球紀念快照</h3>
+            <p class="text-xs text-slate-400">儲存你最喜歡的星球畫面，或分享給朋友一起來探索！</p>
+          </div>
+        </div>
+        <button onclick="closePhotoShareModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-5 overflow-y-auto custom-scroll space-y-4">
+        <!-- 拍立得預覽框 -->
+        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner flex flex-col items-center">
+          <img id="captured-photo-img" src="" alt="B612 星球快照" class="w-full max-h-64 object-contain rounded-xl border border-amber-400/30" />
+          <div class="mt-2.5 flex flex-wrap items-center justify-center gap-2 w-full">
+            <button onclick="downloadCapturedPhoto()" class="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow transition">
+              <i class="ph ph-download-simple text-base"></i>
+              <span>下載紀念相片 (PNG)</span>
+            </button>
+            <button onclick="nativeShareCapturedPhoto()" class="py-2 px-3 rounded-xl bg-pink-500/25 hover:bg-pink-500/40 border border-pink-400/50 text-pink-100 font-bold text-xs flex items-center justify-center gap-1.5 transition" title="使用手機或系統原生分享相片">
+              <i class="ph ph-share-network text-base"></i>
+              <span>系統分享相片</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 社群平台快速分享按鈕列 -->
+        <div class="space-y-2">
+          <div class="text-xs font-medium text-slate-300 flex items-center justify-between">
+            <span>分享星球到社群平台（可先下載相片再貼上）：</span>
+          </div>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <button onclick="shareToSocial('facebook')" class="p-2.5 rounded-xl bg-blue-600/25 hover:bg-blue-600/40 border border-blue-400/40 text-blue-200 text-xs font-medium flex flex-col items-center gap-1 transition">
+              <i class="ph ph-facebook-logo text-xl"></i>
+              <span>臉書 FB</span>
+            </button>
+            <button onclick="shareToSocial('instagram')" class="p-2.5 rounded-xl bg-pink-600/25 hover:bg-pink-600/40 border border-pink-400/40 text-pink-200 text-xs font-medium flex flex-col items-center gap-1 transition">
+              <i class="ph ph-instagram-logo text-xl"></i>
+              <span>IG</span>
+            </button>
+            <button onclick="shareToSocial('threads')" class="p-2.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-400/40 text-slate-100 text-xs font-medium flex flex-col items-center gap-1 transition">
+              <i class="ph ph-at text-xl"></i>
+              <span>脆 Threads</span>
+            </button>
+            <button onclick="shareToSocial('line')" class="p-2.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 border border-emerald-400/40 text-emerald-200 text-xs font-medium flex flex-col items-center gap-1 transition">
+              <i class="ph ph-chat-circle-dots text-xl"></i>
+              <span>LINE</span>
+            </button>
+            <button onclick="shareToSocial('plurk')" class="p-2.5 rounded-xl bg-orange-600/25 hover:bg-orange-600/40 border border-orange-400/40 text-orange-200 text-xs font-medium flex flex-col items-center gap-1 transition">
+              <i class="ph ph-paw-print text-xl"></i>
+              <span>噗浪 Plurk</span>
+            </button>
+            <button onclick="shareToSocial('copy')" class="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/40 text-amber-200 text-xs font-medium flex flex-col items-center gap-1 transition">
+              <i class="ph ph-link text-xl"></i>
+              <span>複製連結</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -678,48 +799,263 @@
       const now = audioCtx.currentTime;
 
       if (type === 'sheep') {
-        // 寫實溫暖的綿羊「咩～～」雙共振峰喉音合成 (低頻基礎 + 喉部顫音 + 母音共振峰濾波)
+        // 軟萌可愛的高音小綿羊「咩～♪」叫聲 (清脆童音頻段 + 俏皮微顫音)
         const osc = audioCtx.createOscillator();
+        const subOsc = audioCtx.createOscillator();
         const lfo = audioCtx.createOscillator();
         const lfoGain = audioCtx.createGain();
-        const formant1 = audioCtx.createBiquadFilter();
-        const formant2 = audioCtx.createBiquadFilter();
+        const filter = audioCtx.createBiquadFilter();
         const masterGain = audioCtx.createGain();
 
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(165, now);
-        osc.frequency.linearRampToValueAtTime(182, now + 0.15);
-        osc.frequency.linearRampToValueAtTime(148, now + 0.78);
+        osc.type = 'triangle';
+        subOsc.type = 'sine';
+        // 明亮可愛的音高曲線 (360Hz -> 430Hz -> 390Hz)
+        osc.frequency.setValueAtTime(350, now);
+        osc.frequency.linearRampToValueAtTime(435, now + 0.12);
+        osc.frequency.setValueAtTime(425, now + 0.35);
+        osc.frequency.linearRampToValueAtTime(375, now + 0.58);
 
-        // 綿羊咩叫的喉音顫動 (Vibrato 28Hz)
+        subOsc.frequency.setValueAtTime(700, now);
+        subOsc.frequency.linearRampToValueAtTime(870, now + 0.12);
+        subOsc.frequency.linearRampToValueAtTime(750, now + 0.58);
+
+        // 輕快可愛的微顫音 (16Hz)
         lfo.type = 'sine';
-        lfo.frequency.setValueAtTime(26, now);
-        lfoGain.gain.setValueAtTime(11, now);
+        lfo.frequency.setValueAtTime(16, now);
+        lfoGain.gain.setValueAtTime(14, now);
         lfo.connect(lfoGain);
         lfoGain.connect(osc.frequency);
+        lfoGain.connect(subOsc.frequency);
 
-        // 「咩 (M-eh-aa)」母音雙共振峰
-        formant1.type = 'bandpass';
-        formant1.frequency.setValueAtTime(680, now);
-        formant1.Q.setValueAtTime(3.2, now);
-
-        formant2.type = 'lowpass';
-        formant2.frequency.setValueAtTime(1450, now);
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1150, now);
+        filter.Q.setValueAtTime(1.8, now);
 
         masterGain.gain.setValueAtTime(0.001, now);
-        masterGain.gain.linearRampToValueAtTime(0.14, now + 0.08);
-        masterGain.gain.setValueAtTime(0.13, now + 0.52);
-        masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+        masterGain.gain.linearRampToValueAtTime(0.16, now + 0.05);
+        masterGain.gain.setValueAtTime(0.14, now + 0.42);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
 
-        osc.connect(formant1);
-        formant1.connect(formant2);
-        formant2.connect(masterGain);
+        osc.connect(filter);
+        subOsc.connect(filter);
+        filter.connect(masterGain);
         masterGain.connect(audioCtx.destination);
 
         osc.start(now);
+        subOsc.start(now);
         lfo.start(now);
-        osc.stop(now + 0.88);
-        lfo.stop(now + 0.88);
+        osc.stop(now + 0.65);
+        subOsc.stop(now + 0.65);
+        lfo.stop(now + 0.65);
+      } else if (type === 'glass_tap') {
+        // 點擊玻璃罩玫瑰：清脆敲玻璃聲 (叮咚雙泛音)
+        [1760, 2637].forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          const t0 = now + i * 0.09;
+          osc.frequency.setValueAtTime(freq, t0);
+          gain.gain.setValueAtTime(0.001, t0);
+          gain.gain.linearRampToValueAtTime(0.09, t0 + 0.008);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.45);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t0);
+          osc.stop(t0 + 0.48);
+        });
+      } else if (type === 'page_flip') {
+        // 點擊地理學家書桌：翻書刷刷聲
+        const bufSize = Math.floor(audioCtx.sampleRate * 0.26);
+        const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufSize) * Math.PI);
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buf;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1400, now);
+        filter.frequency.exponentialRampToValueAtTime(3200, now + 0.24);
+        filter.Q.setValueAtTime(1.5, now);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+      } else if (type === 'flame') {
+        // 點擊街燈：溫暖火苗燃燒呼呼聲與微劈啪聲
+        const bufSize = Math.floor(audioCtx.sampleRate * 0.55);
+        const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) {
+          const crackle = Math.random() > 0.985 ? 2.2 : 0.6;
+          data[i] = (Math.random() * 2 - 1) * crackle;
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buf;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(420, now);
+        filter.frequency.linearRampToValueAtTime(780, now + 0.22);
+        filter.frequency.linearRampToValueAtTime(340, now + 0.52);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.16, now + 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.54);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+      } else if (type === 'leaves_wind') {
+        // 點擊猴麵包樹：微風吹過樹葉的輕柔沙沙聲
+        const bufSize = Math.floor(audioCtx.sampleRate * 0.75);
+        const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buf;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(950, now);
+        filter.frequency.linearRampToValueAtTime(1850, now + 0.35);
+        filter.frequency.linearRampToValueAtTime(850, now + 0.72);
+        filter.Q.setValueAtTime(2.2, now);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.09, now + 0.22);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.74);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+      } else if (type === 'fox_yip') {
+        // 點擊小狐狸：可愛俏皮的小狐狸叫聲 (雙音節コン♪)
+        [0, 0.16].forEach((offset, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const t0 = now + offset;
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(580 + idx * 80, t0);
+          osc.frequency.exponentialRampToValueAtTime(980 + idx * 120, t0 + 0.08);
+          osc.frequency.exponentialRampToValueAtTime(640, t0 + 0.14);
+          gain.gain.setValueAtTime(0.001, t0);
+          gain.gain.linearRampToValueAtTime(0.11, t0 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t0);
+          osc.stop(t0 + 0.16);
+        });
+      } else if (type === 'propeller') {
+        // 點擊雙翼飛機：螺旋槳引擎噗噗旋轉聲
+        const osc = audioCtx.createOscillator();
+        const lfo = audioCtx.createOscillator();
+        const lfoGain = audioCtx.createGain();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(75, now);
+        osc.frequency.linearRampToValueAtTime(115, now + 0.35);
+        osc.frequency.linearRampToValueAtTime(85, now + 0.7);
+        lfo.type = 'sine';
+        lfo.frequency.setValueAtTime(22, now);
+        lfoGain.gain.setValueAtTime(35, now);
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(360, now);
+
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.12, now + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.72);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        lfo.start(now);
+        osc.stop(now + 0.75);
+        lfo.stop(now + 0.75);
+      } else if (type === 'prince_sigh') {
+        // 點擊日落木椅：小王子溫柔放鬆的嘆息聲「哈啊～」
+        const osc = audioCtx.createOscillator();
+        const breathBufSize = Math.floor(audioCtx.sampleRate * 0.95);
+        const breathBuf = audioCtx.createBuffer(1, breathBufSize, audioCtx.sampleRate);
+        const bData = breathBuf.getChannelData(0);
+        for (let i = 0; i < breathBufSize; i++) bData[i] = Math.random() * 2 - 1;
+        const breath = audioCtx.createBufferSource();
+        breath.buffer = breathBuf;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(920, now);
+        filter.frequency.exponentialRampToValueAtTime(520, now + 0.9);
+        filter.Q.setValueAtTime(2.5, now);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(340, now);
+        osc.frequency.exponentialRampToValueAtTime(235, now + 0.88);
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.075, now + 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.92);
+
+        breath.connect(filter);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        breath.start(now);
+        osc.start(now);
+        osc.stop(now + 0.95);
+      } else if (type === 'cute_cheer') {
+        // 點開花苞：可愛歡呼「耶～！喔～♪」音效
+        const notes = [
+          { fStart: 523.25, fEnd: 783.99, t: 0, d: 0.22 },
+          { fStart: 659.25, fEnd: 1046.50, t: 0.24, d: 0.36 }
+        ];
+        notes.forEach(n => {
+          const osc = audioCtx.createOscillator();
+          const sub = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const t0 = now + n.t;
+          osc.type = 'triangle';
+          sub.type = 'sine';
+          osc.frequency.setValueAtTime(n.fStart, t0);
+          osc.frequency.exponentialRampToValueAtTime(n.fEnd, t0 + n.d * 0.65);
+          sub.frequency.setValueAtTime(n.fStart * 2, t0);
+          sub.frequency.exponentialRampToValueAtTime(n.fEnd * 2, t0 + n.d * 0.65);
+
+          gain.gain.setValueAtTime(0.001, t0);
+          gain.gain.linearRampToValueAtTime(0.13, t0 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + n.d);
+
+          osc.connect(gain);
+          sub.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t0);
+          sub.start(t0);
+          osc.stop(t0 + n.d + 0.02);
+          sub.stop(t0 + n.d + 0.02);
+        });
+      } else if (type === 'camera_shutter') {
+        // 拍照快門咔嚓聲
+        const bufSize = Math.floor(audioCtx.sampleRate * 0.09);
+        const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buf;
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+        noise.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
       } else if (type === 'click' || type === 'bud') {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -751,14 +1087,14 @@
         osc.type = 'sine';
         osc.frequency.setValueAtTime(1350, now);
         osc.frequency.exponentialRampToValueAtTime(480, now + 0.55);
-        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.setValueAtTime(0.05, now);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.58);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
         osc.stop(now + 0.6);
       } else if (type === 'sizzle' || type === 'munch') {
-        const bufferSize = audioCtx.sampleRate * 0.28;
+        const bufferSize = audioCtx.sampleRate * 0.35;
         const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
@@ -768,13 +1104,24 @@
         filter.type = type === 'sizzle' ? 'highpass' : 'bandpass';
         filter.frequency.setValueAtTime(type === 'sizzle' ? 2800 : 900, now);
         const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.045, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.27);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
         noise.connect(filter);
         filter.connect(gain);
         gain.connect(audioCtx.destination);
         noise.start(now);
       }
+    }
+
+    // 根據地標 ID 觸發對應的專屬音效
+    function playLandmarkSpecificSfx(landmarkId) {
+      if (landmarkId === 'B612-01玫瑰') playSfx('glass_tap');
+      else if (landmarkId === 'B612-02望遠鏡') playSfx('shooting_star');
+      else if (landmarkId === 'B612-03小狐狸') playSfx('fox_yip');
+      else if (landmarkId === 'B612-04猴麵包樹') playSfx('leaves_wind');
+      else if (landmarkId === 'B612-05街燈') playSfx('flame');
+      else if (landmarkId === 'B612-06書桌' || landmarkId === 'UNCATEGORIZED') playSfx('page_flip');
+      else playSfx('click');
     }
 
     /********************************************************************
@@ -1088,16 +1435,31 @@
       </svg>`,
 
       sheep_graze: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 220">
+        <defs>
+          <radialGradient id="sWool" cx="45%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="65%" stop-color="#fef3c7"/>
+            <stop offset="100%" stop-color="#d6d3d1"/>
+          </radialGradient>
+        </defs>
         <ellipse cx="120" cy="198" rx="70" ry="13" fill="rgba(2,6,23,0.42)"/>
         <g stroke="#292524" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="82" y="148" width="14" height="44" rx="6" fill="#57534e"/>
           <rect x="106" y="152" width="14" height="44" rx="6" fill="#44403c"/>
           <rect x="140" y="152" width="14" height="44" rx="6" fill="#44403c"/>
           <rect x="162" y="148" width="14" height="44" rx="6" fill="#57534e"/>
+          <rect x="82" y="182" width="14" height="10" rx="3" fill="#1c1917"/>
+          <rect x="106" y="186" width="14" height="10" rx="3" fill="#1c1917"/>
+          <rect x="140" y="186" width="14" height="10" rx="3" fill="#1c1917"/>
+          <rect x="162" y="182" width="14" height="10" rx="3" fill="#1c1917"/>
           <path d="M74 134 C54 122, 60 88, 84 86 C94 64, 128 62, 144 78 C168 68, 198 86, 194 112 C208 132, 190 160, 166 156 C150 168, 116 168, 102 156 C80 162, 62 148, 74 134 Z" fill="url(#sWool)"/>
+          <path d="M104 96 Q120 106 134 94 M140 122 Q156 132 170 120" fill="none" stroke="#e7e5e4" stroke-width="3.5"/>
+          <ellipse cx="44" cy="134" rx="14" ry="6" transform="rotate(-35 44 134)" fill="#fde68a"/>
           <ellipse cx="54" cy="154" rx="26" ry="23" transform="rotate(-28 54 154)" fill="#fde68a"/>
+          <path d="M44 132 C52 122, 70 124, 74 136 C64 142, 50 140, 44 132 Z" fill="url(#sWool)"/>
           <circle cx="44" cy="154" r="4.5" fill="#1c1917" stroke="none"/>
           <circle cx="42.5" cy="152.5" r="1.5" fill="#ffffff" stroke="none"/>
+          <ellipse cx="48" cy="162" rx="4.5" ry="2.5" fill="#fb7185" opacity="0.55" stroke="none"/>
           <path d="M32 172 L16 184 M36 174 L24 162" stroke="#4ade80" stroke-width="4.5"/>
         </g>
       </svg>`,
@@ -2166,8 +2528,8 @@
       entry.mesh.material.map = getStandeeTexture(svgKey);
       entry.mesh.material.needsUpdate = true;
       entry.mesh.scale.set(scaleBoost, scaleBoost, scaleBoost);
-      playSfx('bloom');
-      showPlanetToast('🌸', `花苞綻放成了美麗的【${labelName}】！（若 3 分鐘未讀新文章會被小綿羊吃掉喔）`);
+      playSfx('cute_cheer');
+      showPlanetToast('🌸', `耶～！花苞綻放成了美麗的【${labelName}】！（若 3 分鐘未讀新文章會被小綿羊吃掉喔）`);
     }
 
     function updateSheepAnimation(elapsed, delta) {
@@ -2309,7 +2671,7 @@
     }
 
     function focusAndInspectLandmark(lm) {
-      playSfx('click');
+      playLandmarkSpecificSfx(lm.id);
       isInspectingChair = false;
       inspectedLandmark = lm;
       document.getElementById('chair-zen-banner').classList.add('hidden');
@@ -2409,7 +2771,7 @@
 
     // 點選日落木椅的特殊微斜後方視角 (固定從小王子後方往遠方 3D 落日看，直到點擊畫面離開)
     function triggerChairSunsetView() {
-      playSfx('click');
+      playSfx('prince_sigh');
       hideRadialMenu();
       closeArticleDrawer();
       setSunsetMode(true);
@@ -2468,7 +2830,7 @@
     }
 
     function focusAuthorBiplane() {
-      playSfx('click');
+      playSfx('propeller');
       hideRadialMenu();
       setSunsetMode(false);
       planetGroup.updateMatrixWorld(true);
@@ -2946,7 +3308,7 @@
 
     // 點擊「放小羊的紙箱」抽取正向鼓勵性文章（排除批判性字眼）
     function openPositiveRandomArticleFromBox() {
-      playSfx('click');
+      playSfx('sheep');
       const positiveRegex = /盼望|恩典|愛|安慰|光|喜樂|平安|祝福|溫柔|陪伴|醫治|禱告|感謝|復活/;
       const criticalRegex = /批判|謬誤|異端|駁斥|譴責|爭論|亂象/;
 
@@ -2958,9 +3320,170 @@
       if (candidates.length === 0) return;
 
       const picked = candidates[Math.floor(Math.random() * candidates.length)];
-      showPlanetToast('📦', `從綿羊紙箱為你抽出了溫暖好文：《${picked.title}》`);
+      showPlanetToast('📦', `咩～！從綿羊紙箱為你抽出了溫暖好文：《${picked.title}》`);
       openArticleDrawer(LANDMARKS[0], 'ALL');
       openArticleReaderView(picked);
+    }
+
+    /********************************************************************
+     * 9.5 文章字體大小調整 (小 / 中 / 大 / 特大) 與拍照社群分享功能
+     ********************************************************************/
+    const FONT_SIZE_CONFIG = {
+      sm: { size: '0.96rem', lineHeight: '1.85' },
+      md: { size: '1.12rem', lineHeight: '1.95' },
+      lg: { size: '1.28rem', lineHeight: '2.05' },
+      xl: { size: '1.48rem', lineHeight: '2.15' }
+    };
+
+    function setArticleFontSize(level) {
+      const cfg = FONT_SIZE_CONFIG[level] || FONT_SIZE_CONFIG.md;
+      const proseEl = document.getElementById('reader-content');
+      if (proseEl) {
+        proseEl.style.fontSize = cfg.size;
+        proseEl.style.lineHeight = cfg.lineHeight;
+      }
+      ['sm', 'md', 'lg', 'xl'].forEach(k => {
+        const btn = document.getElementById('font-btn-' + k);
+        if (!btn) return;
+        if (k === level) {
+          btn.className = 'px-2 py-1 rounded-lg text-xs bg-amber-400 text-slate-950 font-bold transition';
+        } else {
+          btn.className = 'px-2 py-1 rounded-lg text-xs text-slate-300 hover:text-amber-200 transition';
+        }
+      });
+      try { localStorage.setItem('b612_article_font_size', level); } catch (e) {}
+    }
+
+    let lastCapturedDataUrl = '';
+
+    function captureAndOpenPhotoModal() {
+      playSfx('camera_shutter');
+      renderer.render(scene, camera);
+
+      const srcCanvas = renderer.domElement;
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = srcCanvas.width;
+      outCanvas.height = srcCanvas.height;
+      const ctx = outCanvas.getContext('2d');
+
+      // 1. 繪製星空或日落背景漸層
+      const grad = ctx.createRadialGradient(
+        outCanvas.width * 0.5, outCanvas.height * 0.4, 10,
+        outCanvas.width * 0.5, outCanvas.height * 0.5, Math.max(outCanvas.width, outCanvas.height) * 0.75
+      );
+      if (isSunsetActive) {
+        grad.addColorStop(0, '#7c2d12');
+        grad.addColorStop(0.5, '#1e1b4b');
+        grad.addColorStop(1, '#090d16');
+      } else {
+        grad.addColorStop(0, '#172554');
+        grad.addColorStop(0.55, '#0f172a');
+        grad.addColorStop(1, '#020617');
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+
+      // 2. 疊加 Three.js 3D 星球畫面
+      ctx.drawImage(srcCanvas, 0, 0);
+
+      // 3. 繪製精緻底部紀念浮水印標誌
+      const pad = Math.round(outCanvas.width * 0.025);
+      ctx.save();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+      const badgeW = Math.min(340, outCanvas.width * 0.78);
+      const badgeH = 44;
+      ctx.beginPath();
+      ctx.roundRect(pad, outCanvas.height - badgeH - pad, badgeW, badgeH, 14);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#fef3c7';
+      ctx.font = 'bold 16px "Noto Serif TC", serif';
+      ctx.fillText('🪐 B612 神學小星球 ‧ 星空漫步紀念', pad + 14, outCanvas.height - pad - 16);
+      ctx.restore();
+
+      lastCapturedDataUrl = outCanvas.toDataURL('image/png');
+      const imgEl = document.getElementById('captured-photo-img');
+      if (imgEl) imgEl.src = lastCapturedDataUrl;
+
+      const modal = document.getElementById('photo-share-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closePhotoShareModal() {
+      const modal = document.getElementById('photo-share-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function downloadCapturedPhoto() {
+      if (!lastCapturedDataUrl) return;
+      const a = document.createElement('a');
+      a.href = lastCapturedDataUrl;
+      a.download = `B612神學小星球_${new Date().toISOString().slice(0, 10)}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showPlanetToast('📸', '紀念相片已下載至你的裝置！');
+    }
+
+    async function nativeShareCapturedPhoto() {
+      const shareUrl = window.location.href;
+      const shareTitle = 'B612 神學小星球';
+      const shareText = '我在「B612 神學小星球」與小王子一起漫步星空、讀神學好文！邀請你一起來探索 🪐';
+      try {
+        if (navigator.share && lastCapturedDataUrl) {
+          const res = await fetch(lastCapturedDataUrl);
+          const blob = await res.blob();
+          const file = new File([blob], 'b612-planet.png', { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ title: shareTitle, text: shareText, url: shareUrl, files: [file] });
+            return;
+          }
+          await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+          return;
+        }
+      } catch (err) {
+        console.warn('Native share cancelled or unavailable:', err);
+      }
+      downloadCapturedPhoto();
+    }
+
+    function copyTextToClipboard(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+    }
+
+    function shareToSocial(platform) {
+      playSfx('click');
+      const shareUrl = window.location.href;
+      const shareText = '我在「B612 神學小星球」與小王子一起漫步星空、讀神學好文！🪐';
+
+      if (platform === 'facebook') {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'line') {
+        window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'threads') {
+        window.open(`https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'plurk') {
+        window.open(`https://www.plurk.com/?qualifier=shares&status=${encodeURIComponent(shareUrl + ' (' + shareText + ')')}`, '_blank', 'noopener,noreferrer');
+      } else if (platform === 'instagram') {
+        downloadCapturedPhoto();
+        copyTextToClipboard(shareText + ' ' + shareUrl);
+        showPlanetToast('📸', '已為你下載相片並複製星球連結，打開 IG 即可直接發限動或貼文分享！');
+      } else if (platform === 'copy') {
+        copyTextToClipboard(shareUrl);
+        showPlanetToast('🔗', '星球網址已複製到剪貼簿！可以貼給朋友囉～');
+      }
     }
 
     /********************************************************************
@@ -3266,6 +3789,10 @@
     window.onload = function () {
       renderBottomLandmarkBar();
       fetchBloggerBatch(1);
+      try {
+        const savedFont = localStorage.getItem('b612_article_font_size');
+        if (savedFont) setArticleFontSize(savedFont);
+      } catch (e) {}
       try {
         if (!localStorage.getItem('b612_hide_welcome_v2')) {
           openWelcomeModal();
